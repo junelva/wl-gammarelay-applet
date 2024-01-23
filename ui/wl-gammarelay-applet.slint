@@ -39,7 +39,7 @@ export component VerticalSlider inherits Rectangle {
     in property<float> maximum: 100;
     in property<float> minimum: 0;
     in-out property<float> value;
-    property<float> previous-value: self.value;
+    property<float> previous-value;
     
     min-height: 60px;
     preferred-height: 120px;
@@ -68,34 +68,23 @@ export component VerticalSlider inherits Rectangle {
             } else if (event.delta-y <= -1px) {
                 root.value = max(root.minimum, min(root.maximum, root.value - (event.modifiers.shift ? 0.01 : 0.025)));
             }
-
-            if (abs(root.value - root.previous-value) > 0.01) {
-                Parameters.slider-changed(root.param-name, root.previous-value, root.value);
-                root.previous-value = root.value;
-            }
+            Parameters.slider-changed(root.param-name, root.previous-value, root.value);
             EventResult.accept
         }
         pointer-event(event) => {
             if (event.button == PointerEventButton.left && event.kind == PointerEventKind.down) {
+                root.previous-value = root.value;
                 root.value = root.maximum - ((touch.mouse-y / touch.height) * (root.maximum));
                 self.pressed-value = root.value;
-
-                if (abs(root.value - root.previous-value) > 0.01) {
-                    Parameters.slider-changed(root.param-name, root.previous-value, root.value);
-                    root.previous-value = root.value;
-                }
+                Parameters.slider-changed(root.param-name, root.previous-value, root.value);
             }
         }
         moved => {
             if (self.enabled && self.pressed) {
                 root.previous-value = root.value;
                 root.value = max(root.minimum, min(root.maximum,
-                    self.pressed-value + -(touch.mouse-y - touch.pressed-y) * (root.maximum - root.minimum) / (root.height - handle.height)));
-
-                if (abs(root.value - root.previous-value) > 0.01) {
-                    Parameters.slider-changed(root.param-name, root.previous-value, root.value);
-                    root.previous-value = root.value;
-                }
+                    self.pressed-value - (touch.mouse-y - touch.pressed-y) * (root.maximum - root.minimum) / (root.height - handle.height)));
+                Parameters.slider-changed(root.param-name, root.previous-value, root.value);
             }
         }
     }
