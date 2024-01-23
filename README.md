@@ -3,7 +3,11 @@
 
 ![wl-gammarelay-applet demo](./doc/wga.gif)
 
-`wl-gammarelay-applet` is a small desktop applet for controlling `wl-gammarelay-rs` via DBus. This applet is written in Rust and uses [slint](https://github.com/slint-ui/slint) to create an async GUI window. Despite this specific purpose, the applet is configurable:
+`wl-gammarelay-applet` is a small desktop applet for controlling `wl-gammarelay-rs` via DBus.
+
+This applet is written in Rust and provides a [Slint](https://github.com/slint-ui/slint) UI.
+
+The applet is configurable:
 ```
 $ wl-gammarelay-applet --help
 Control wl-gammarelay-rs via applet.
@@ -24,7 +28,7 @@ Options:
   -V, --version                        Print version
 ```
 
-Known issues: escape does not close the window. Moving the cursor away from the window will cause it to fade out and close. If you spend a long time scrolling over the sliders, the applet loses connection and must be restarted.
+Known issues: escape does not close the window (todo). If you spend a long time scrolling over the sliders, the applet loses connection and must be restarted (cause unknown; suspect DBus rate limiting).
 
 Contribution welcome.
 
