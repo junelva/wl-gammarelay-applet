@@ -24,9 +24,7 @@ Options:
   -V, --version                        Print version
 ```
 
-Known issues:
-    - `Escape` does not close the window. Moving the cursor away from the window will cause it to fade out and close.
-    - If you spend a long time scrolling over the sliders, the applet loses connection and must be restarted.
+Known issues: escape does not close the window. Moving the cursor away from the window will cause it to fade out and close. If you spend a long time scrolling over the sliders, the applet loses connection and must be restarted.
 
 Contribution welcome.
 
@@ -57,11 +55,11 @@ Different configurations not widely tested. Feedback welcome.
 
 #### Configuration in Sway
 Add to `~/.config/sway/config`:
-```bash
+```swayconfig
 for_window [app_id="wl-gammarelay-applet"] sticky enable, move position cursor, move up 20
 ```
 
-#### Curiousity
+#### Curiosity
 ```bash
 # Display only brightness and gamma with caret.
 wl-gammarelay-applet -it -p0 -x175
