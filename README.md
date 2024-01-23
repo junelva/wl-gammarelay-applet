@@ -1,5 +1,8 @@
 ### wl-gammarelay-applet
 #### Control wl-gammarelay-rs via applet.
+
+![wl-gammarelay-applet demo](./doc/wga.gif)
+
 `wl-gammarelay-applet` is a small desktop applet for controlling `wl-gammarelay-rs` via DBus. This applet is written in Rust and uses [slint](https://github.com/slint-ui/slint) to create an async GUI window. Despite this specific purpose, the applet is configurable:
 ```
 $ wl-gammarelay-applet --help
