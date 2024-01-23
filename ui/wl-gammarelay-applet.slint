@@ -1,0 +1,254 @@
+import { CheckBox, Slider } from "std-widgets.slint";
+
+export component ToggleSwitch inherits Rectangle {
+    callback toggled;
+    in-out property <bool> checked;
+    min-height: 16px;
+    max-height: 24px;
+
+    HorizontalLayout {
+        indicator := Rectangle {
+            border-radius: 3px;
+            background: touch.has-hover ? (checked ? #888 : #555) : (checked ? #666 : #444);
+            animate background { duration: 100ms; }
+
+            bubble := Rectangle {
+                height: parent.height;
+                width: parent.width / 2.5;
+                border-radius: 3px;
+                x: self.a * (indicator.width - bubble.width);
+                property <float> a: checked ? 1 : 0;
+                background: touch.has-hover ? (checked ? #eee : #888) : (checked ? #ddd : #666);
+                animate a, background { duration: 200ms; easing: ease;}
+            }
+        }
+    }
+
+    touch := TouchArea {
+        width: root.width;
+        height: root.height;
+        clicked => {
+            checked = !checked;
+            Parameters.invert-changed(checked);
+        }
+    }
+}
+
+export component VerticalSlider inherits Rectangle {
+    in property<string> param-name;
+    in property<float> maximum: 100;
+    in property<float> minimum: 0;
+    in-out property<float> value;
+    property<float> previous-value: self.value;
+    
+    min-height: 60px;
+    preferred-height: 120px;
+    preferred-width: 20px;
+
+    border-radius: 3px;
+    background: touch.has-hover ? 
+        (touch.pressed ? #666 : #555) :
+        (touch.pressed ? #666 : #444);
+
+    handle := Rectangle {
+        width: parent.width - 2px;
+        height: 6px;
+        border-radius: 3px;
+        background: touch.pressed ? #eee : touch.has-hover ? #ddd : #aaa;
+        y: (root.height - self.height) * root.value/(root.minimum - root.maximum) + root.height - self.height;
+        animate y, background { duration: 60ms; }
+    }
+
+    touch := TouchArea {
+        property<float> pressed-value;
+        scroll-event(event) => {
+            root.previous-value = root.value;
+            if (event.delta-y >= 1px) {
+                root.value = max(root.minimum, min(root.maximum, root.value + (event.modifiers.shift ? 0.01 : 0.025)));
+            } else if (event.delta-y <= -1px) {
+                root.value = max(root.minimum, min(root.maximum, root.value - (event.modifiers.shift ? 0.01 : 0.025)));
+            }
+
+            if (abs(root.value - root.previous-value) > 0.01) {
+                Parameters.slider-changed(root.param-name, root.previous-value, root.value);
+                root.previous-value = root.value;
+            }
+            EventResult.accept
+        }
+        pointer-event(event) => {
+            if (event.button == PointerEventButton.left && event.kind == PointerEventKind.down) {
+                root.value = root.maximum - ((touch.mouse-y / touch.height) * (root.maximum));
+                self.pressed-value = root.value;
+
+                if (abs(root.value - root.previous-value) > 0.01) {
+                    Parameters.slider-changed(root.param-name, root.previous-value, root.value);
+                    root.previous-value = root.value;
+                }
+            }
+        }
+        moved => {
+            if (self.enabled && self.pressed) {
+                root.previous-value = root.value;
+                root.value = max(root.minimum, min(root.maximum,
+                    self.pressed-value + -(touch.mouse-y - touch.pressed-y) * (root.maximum - root.minimum) / (root.height - handle.height)));
+
+                if (abs(root.value - root.previous-value) > 0.01) {
+                    Parameters.slider-changed(root.param-name, root.previous-value, root.value);
+                    root.previous-value = root.value;
+                }
+            }
+        }
+    }
+}
+
+component LabeledToggleSwitch inherits HorizontalLayout {
+    in property <string> label;
+    in-out property <bool> checked;
+    padding: 5px;
+    spacing: 6px;
+
+    if Startup.show_labels : Rectangle {
+        Text {
+            text: root.label;
+            font-size: 16px;
+        }
+    }
+
+    switch := ToggleSwitch { checked: checked; }
+}
+
+component LabeledVerticalSlider inherits VerticalLayout {
+    in property <string> param-name;
+    in property <string> label;
+    in property <float> minimum;
+    in property <float> maximum;
+    in-out property <float> value;
+    padding: 1px;
+    spacing: 6px;
+
+    if Startup.show_labels : Rectangle {
+        Text {
+            text: root.label;
+            font-size: 13px;
+        }
+    }
+
+    slider := VerticalSlider {
+        param-name: param-name;
+        minimum: root.minimum;
+        maximum: root.maximum;
+        value: root.value;
+    }
+}
+
+export component WindowCaret inherits Path {
+    commands: "M0,0 L2,4 C3,6 5,6 6,4 L8,0"; // rounded triangle
+    // commands: "M0,0 L2,4 C4,8 4,8 6,4 L8,0"; // sharper triangle
+}
+
+export global Parameters {
+    callback invert-changed(bool);
+    callback slider-changed(string, float, float);
+    in-out property<float> window-opacity: 0.0;
+
+    in-out property<bool> invert;
+    in-out property<float> temperature;
+    in-out property<float> brightness;
+    in-out property<float> gamma;
+}
+
+export global Startup {
+    in-out property<bool> fade-in: true;
+    in property<float> fade-in-speed: 8.0;
+    in property<float> fade-out-speed: 2.0;
+
+    in property<bool> show-invert: true;
+    in property<bool> show-temperature: true;
+    in property<bool> show-brightness: true;
+    in property<bool> show-gamma: true;
+   
+    in property<bool> show-caret: true;
+    in property<bool> show-labels: true;
+   
+    in property<int> outer-padding: 8;
+    in property<int> window-width: 100;
+    in property<int> window-height: 220;
+}
+
+export component WlGammaRelayApplet inherits Window {
+    title: "wl-gammarelay-applet";
+    background: rgba(0.0, 0.0, 0.0, 0.0);
+    preferred-width: Startup.window_width * 1px;
+    preferred-height: Startup.window_height * 1px;
+    no-frame: true;
+    
+    callback tick(float);
+    callback manage_opacity(float);
+    manage_opacity(delta) => {
+        if (applet-focus.has-hover) {
+            Startup.fade-in = false;
+        }
+        if ((Startup.fade-in || applet-focus.has-hover) && Parameters.window-opacity <= 1.0) {
+            Parameters.window-opacity += delta * Startup.fade-in-speed;
+            if (Parameters.window-opacity >= 1.0) {
+                Parameters.window-opacity = 1.0;
+            }
+        } else if (!applet-focus.has-hover) {
+            Parameters.window-opacity -= delta * Startup.fade-out-speed;
+        }
+    }
+
+    applet-focus := TouchArea {
+        opaque-region := VerticalLayout {
+            panel-rect := Rectangle {
+                border-width: 2px;
+                border-color: #777;
+                border-radius: 6px;
+                background: #111;
+                opacity: Parameters.window-opacity;
+            
+                controls := VerticalLayout {
+                    padding: Startup.outer_padding * 1px;
+
+                    if Startup.show_invert : invert := LabeledToggleSwitch {
+                        label: "◩";
+                        checked: Parameters.invert;
+                        padding-bottom: 0px;
+                    }
+
+                    sliders := HorizontalLayout {
+                        padding: 4px;
+                        spacing: 2px;
+
+                        if Startup.show_temperature : temperature := LabeledVerticalSlider {
+                            label: "";
+                            param-name: "temperature";
+                            value: Parameters.temperature;
+                            minimum: 0.0;
+                            maximum: 1.0;
+                        }
+                        if Startup.show_brightness : brightness := LabeledVerticalSlider {
+                            label: "";
+                            param-name: "brightness";
+                            value: Parameters.brightness;
+                            minimum: 0.0;
+                            maximum: 1.0;
+                        }
+                        if Startup.show_gamma : gamma := LabeledVerticalSlider {
+                            label: "𝚪";
+                            param-name: "gamma";
+                            value: Parameters.gamma;
+                            minimum: 0.0;
+                            maximum: 1.0;
+                        }
+                    }
+                }
+            }
+            if Startup.show_caret : tail := WindowCaret {
+                fill: #777;
+                height: 16px;
+                opacity: Parameters.window-opacity;
+            }
+        }
+    }
+}
