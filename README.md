@@ -21,6 +21,10 @@ Options:
   -V, --version                        Print version
 ```
 
+Known issues:
+    - `Escape` does not close the window. Moving the cursor away from the window will cause it to fade out and close.
+    - If you spend a long time scrolling over the sliders, the applet loses connection and must be restarted.
+
 Contribution welcome.
 
 #### Getting Started
@@ -45,6 +49,8 @@ Suggestion:
     "on-scroll-down": "busctl --user -- call rs.wl-gammarelay / rs.wl.gammarelay UpdateTemperature n -100"
 },
 ```
+
+Different configurations not widely tested. Feedback welcome.
 
 #### Configuration in Sway
 Add to `~/.config/sway/config`:
