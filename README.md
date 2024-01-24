@@ -29,6 +29,12 @@ Options:
   -V, --version                        Print version
 ```
 
+#### Usage
+
+Click, drag, or scroll the sliders to change the values. Shift+scroll changes the value in smaller increments. If you resize windows in your compositor with the `meta` key, the applet window can be resized.
+
+#### Changes
+
 0.1.4 changes:
 - [x] Text label showing set value.
 - [x] Lock fade if shift or meta pressed.
