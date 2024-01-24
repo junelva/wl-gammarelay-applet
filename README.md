@@ -22,6 +22,7 @@ Options:
   -c, --hide-caret                     Hides "speech bubble" caret at bottom of applet
   -l, --hide-labels                    Hides text labels of control widgets
   -v, --hide-value                     Hides text value of active control widgets
+  -f, --never-fade                     Set this flag to never automatically fade the window
   -p, --outer-padding <OUTER_PADDING>  Set applet window outer padding [default: 8]
   -x, --window-width <WINDOW_WIDTH>    Set applet window width (horizontal) [default: 100]
   -y, --window-height <WINDOW_HEIGHT>  Set applet window height (vertical) [default: 220]
@@ -31,7 +32,7 @@ Options:
 
 #### Usage
 
-Click, drag, or scroll the sliders to change the values. `shift + scroll` changes the value in smaller increments. If you resize windows in your compositor with the `meta` key, the applet window can be resized. Pressing `escape` will close the window.
+Click, drag, or scroll the sliders to change the values. `shift + scroll` changes the value in smaller increments. Right-clicking a slider will set it to the default value. If you resize windows in your compositor with the `meta` key, the applet window can be resized. Pressing `escape` will close the window.
 
 #### Changes
 
@@ -40,14 +41,16 @@ Click, drag, or scroll the sliders to change the values. `shift + scroll` change
 - [x] Lock fade if shift or meta pressed.
 - [x] Option to never fade out.
 - [x] Esc to close window.
-- [ ] Configurable min & max.
-- [ ] Configurable default value.
-- [ ] Right-click to reset to default.
+- [x] Configurable default value.
+- [x] Right-click to reset to default.
 
 0.1.3 changes:
 - Switch to blocking zbus proxy.
 - Round temperature adjustments to nearest 100.
 - Safely mutate settings, call DBus proxy from threads.
+
+Known issue(s):
+- There can be drift when changing sliders with wheel or left click. Usually not a problem.
 
 Contribution welcome.
 

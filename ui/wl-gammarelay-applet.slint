@@ -38,6 +38,7 @@ export component VerticalSlider inherits Rectangle {
     in property<string> param-name;
     in property<float> maximum: 100;
     in property<float> minimum: 0;
+    in property<float> default-value;
     in-out property<float> value;
     
     min-height: 60px;
@@ -76,6 +77,10 @@ export component VerticalSlider inherits Rectangle {
                 self.pressed-value-for-dragging = root.value;
                 Parameters.slider-changed(root.param-name, root.value);
             }
+            if (event.button == PointerEventButton.right && event.kind == PointerEventKind.down) {
+                root.value = root.default-value;
+                Parameters.slider-default(root.param-name);
+            }
         }
         moved => {
             if (self.enabled && self.pressed) {
@@ -108,6 +113,7 @@ component LabeledVerticalSlider inherits VerticalLayout {
     in property <string> label;
     in property <float> minimum;
     in property <float> maximum;
+    in property <float> default-value;
     in-out property <float> value;
     padding: 1px;
     spacing: 6px;
@@ -123,6 +129,7 @@ component LabeledVerticalSlider inherits VerticalLayout {
         param-name: param-name;
         minimum: root.minimum;
         maximum: root.maximum;
+        default-value: root.default-value;
         value: root.value;
     }
 }
@@ -135,6 +142,7 @@ export component WindowCaret inherits Path {
 export global Parameters {
     callback invert-changed(bool);
     callback slider-changed(string, float);
+    callback slider-default(string);
     in-out property<float> window-opacity: 0.0;
     in-out property<string> value-text: "";
     in-out property<bool> focus-retain: false;
@@ -164,6 +172,10 @@ export global Startup {
     in property<int> outer-padding: 8;
     in property<int> window-width: 100;
     in property<int> window-height: 220;
+
+    in property<float> default-temperature;
+    in property<float> default-brightness;
+    in property<float> default-gamma;
 }
 
 export component WlGammaRelayApplet inherits Window {
@@ -241,6 +253,7 @@ export component WlGammaRelayApplet inherits Window {
                                 label: "";
                                 param-name: "temperature";
                                 value: Parameters.temperature;
+                                default-value: Startup.default-temperature;
                                 minimum: 0.0;
                                 maximum: 1.0;
                             }
@@ -248,6 +261,7 @@ export component WlGammaRelayApplet inherits Window {
                                 label: "";
                                 param-name: "brightness";
                                 value: Parameters.brightness;
+                                default-value: Startup.default-brightness;
                                 minimum: 0.0;
                                 maximum: 1.0;
                             }
@@ -255,6 +269,7 @@ export component WlGammaRelayApplet inherits Window {
                                 label: "𝚪";
                                 param-name: "gamma";
                                 value: Parameters.gamma;
+                                default-value: Startup.default-gamma;
                                 minimum: 0.0;
                                 maximum: 1.0;
                             }
