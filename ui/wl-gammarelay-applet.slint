@@ -136,6 +136,7 @@ export global Parameters {
     callback invert-changed(bool);
     callback slider-changed(string, float);
     in-out property<float> window-opacity: 0.0;
+    in-out property<string> value-text: "";
 
     in-out property<bool> invert;
     in-out property<float> temperature;
@@ -148,6 +149,7 @@ export global Startup {
     in property<float> fade-in-speed: 8.0;
     in property<float> fade-out-speed: 2.0;
 
+    in property<bool> show-value: true;
     in property<bool> show-invert: true;
     in property<bool> show-temperature: true;
     in property<bool> show-brightness: true;
@@ -195,6 +197,12 @@ export component WlGammaRelayApplet inherits Window {
             
                 controls := VerticalLayout {
                     padding: Startup.outer_padding * 1px;
+                    
+                    if Startup.show_value : value := Rectangle {
+                        Text {
+                            text: Parameters.value-text;
+                        }
+                    }
 
                     if Startup.show_invert : invert := LabeledToggleSwitch {
                         label: "◩";

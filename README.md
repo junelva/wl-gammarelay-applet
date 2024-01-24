@@ -21,6 +21,7 @@ Options:
   -g, --hide-gamma                     Hides slider that controls Gamma
   -c, --hide-caret                     Hides "speech bubble" caret at bottom of applet
   -l, --hide-labels                    Hides text labels of control widgets
+  -v, --hide-value                     Hides text value of active control widgets
   -p, --outer-padding <OUTER_PADDING>  Set applet window outer padding [default: 8]
   -x, --window-width <WINDOW_WIDTH>    Set applet window width (horizontal) [default: 100]
   -y, --window-height <WINDOW_HEIGHT>  Set applet window height (vertical) [default: 220]
@@ -28,16 +29,18 @@ Options:
   -V, --version                        Print version
 ```
 
-0.1.3 changes:
-- Switch to blocking zbus proxy.
-- Round temperature adjustments to nearest 100.
-- Safely mutate settings, call DBus proxy from threads.
-
-To do:
+0.1.4 changes:
+- [x] Text label showing set value.
+- [ ] Lock fade if key pressed.
 - [ ] Esc to close window.
 - [ ] Configurable min & max.
 - [ ] Configurable default value.
 - [ ] Right-click to reset to default.
+
+0.1.3 changes:
+- Switch to blocking zbus proxy.
+- Round temperature adjustments to nearest 100.
+- Safely mutate settings, call DBus proxy from threads.
 
 Contribution welcome.
 
@@ -80,6 +83,7 @@ wl-gammarelay-applet -it -p0 -x175
 # Display only the unlabeled gamma slider.
 wl-gammarelay-applet -bltic
 
-# Display a dark, empty square. Could this be the perfect GUI?
+# Display a dark, empty square.
+# Could this be the perfect GUI?
 wl-gammarelay-applet -bigtlc -p 100
 ```

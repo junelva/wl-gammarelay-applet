@@ -45,6 +45,9 @@ struct Args {
     /// Hides text labels of control widgets
     #[arg(short = 'l', long, default_value_t = false)]
     hide_labels: bool,
+    /// Hides text value of active control widgets
+    #[arg(short = 'v', long, default_value_t = false)]
+    hide_value: bool,
     /// Set applet window outer padding
     #[arg(short = 'p', long, default_value_t = 8)]
     outer_padding: usize,
@@ -95,18 +98,6 @@ trait GammaRelay {
 fn dbus_temperature_to_ui_value(dbus_value: u16) -> f32 {
     (dbus_value as f32 - 1000.0) * (1.0 / 7000.0)
 }
-// 0.2 - 1.0 to
-// 0.0 - 1.0
-fn dbus_brightness_to_ui_value(dbus_value: f64) -> f32 {
-    ((dbus_value - 0.2) / 0.8) as f32
-}
-
-// 0.5 - 1.5 to
-// 0.0 - 1.0
-fn dbus_gamma_to_ui_value(dbus_value: f64) -> f32 {
-    (dbus_value - 0.5) as f32
-}
-
 //  0.0 - 1.0 to
 // 1000 - 8000
 fn ui_temperature_to_dbus_value(ui_value: f32) -> i16 {
@@ -115,23 +106,52 @@ fn ui_temperature_to_dbus_value(ui_value: f32) -> i16 {
 // fn ui_temperature_delta_to_dbus_value(ui_value: f32) -> i16 {
 //     (ui_value * 7000.0) as i16
 // }
+fn dbus_temperature_to_string(dbus_value: i16) -> String {
+    format!("{dbus_value} K")
+}
+fn dbus_temperature_rounded(dbus_value: i16) -> i16 {
+    (dbus_value as f64 / 100.0) as i16 * 100
+}
 
+// 0.2 - 1.0 to
+// 0.0 - 1.0
+fn dbus_brightness_to_ui_value(dbus_value: f64) -> f32 {
+    ((dbus_value - 0.2) / 0.8) as f32
+}
 // 0.0 - 1.0 to
 // 0.2 - 1.0
 // fn ui_brightness_to_dbus_value(ui_value: f32) -> f64 {
 //     ui_value as f64 * 0.8 + 0.2
 // }
-fn ui_brightness_delta_to_dbus_value(ui_value: f32) -> f64 {
-    ui_value as f64 * 0.8
+// fn ui_brightness_delta_to_dbus_value(ui_value: f32) -> f64 {
+//     ui_value as f64 * 0.8
+// }
+fn dbus_brightness_to_string(dbus_value: f64) -> String {
+    let percentage = dbus_value * 100.0;
+    format!("{percentage:.2} %")
+}
+fn dbus_brightness_rounded(dbus_value: f64) -> f64 {
+    (dbus_value * 100.0).round() / 100.0
 }
 
+// 0.5 - 1.5 to
+// 0.0 - 1.0
+fn dbus_gamma_to_ui_value(dbus_value: f64) -> f32 {
+    (dbus_value - 0.5) as f32
+}
 // 0.0 - 1.0 to
 // 0.5 - 1.5
 // fn ui_gamma_to_dbus_value(ui_value: f32) -> f64 {
 //     ui_value as f64 + 0.5
 // }
-fn ui_gamma_delta_to_dbus_value(ui_value: f32) -> f64 {
-    ui_value as f64
+// fn ui_gamma_delta_to_dbus_value(ui_value: f32) -> f64 {
+//     ui_value as f64
+// }
+fn dbus_gamma_to_string(dbus_value: f64) -> String {
+    format!("{dbus_value:.2} γ")
+}
+fn dbus_gamma_rounded(dbus_value: f64) -> f64 {
+    (dbus_value * 100.0).round() / 100.0
 }
 
 fn create_proxy() -> Result<GammaRelayProxyBlocking<'static>, AppletError> {
@@ -208,6 +228,7 @@ fn main() -> Result<(), AppletError> {
         app.global::<Startup>().set_show_gamma(!(args.hide_gamma));
         app.global::<Startup>().set_show_caret(!args.hide_caret);
         app.global::<Startup>().set_show_labels(!args.hide_labels);
+        app.global::<Startup>().set_show_value(!args.hide_value);
         app.global::<Startup>()
             .set_outer_padding(args.outer_padding as i32);
         app.global::<Startup>()
@@ -218,26 +239,47 @@ fn main() -> Result<(), AppletError> {
         let proxy_ref = proxy.clone();
         let get_dbus_state = spawn(move || {
             let proxy = proxy_ref.lock().expect("rust: unlock proxy");
+            let startup_dbus_invert = proxy.inverted().expect("rust: get inverted from dbus");
+            let startup_dbus_temperature = proxy
+                .temperature()
+                .expect("rust: get temperature from dbus");
+            let startup_dbus_brightness =
+                proxy.brightness().expect("rust: get brightness from dbus");
+            let startup_dbus_gamma = proxy.gamma().expect("rust: get gamma from dbus");
+
             (
-                if proxy.inverted().expect("rust: get inverted from dbus") {
-                    1.0
-                } else {
-                    0.0
-                },
-                dbus_temperature_to_ui_value(
-                    proxy
-                        .temperature()
-                        .expect("rust: get temperature from dbus"),
-                ),
-                dbus_brightness_to_ui_value(
-                    proxy.brightness().expect("rust: get brightness from dbus"),
-                ),
-                dbus_gamma_to_ui_value(proxy.gamma().expect("rust: get gamma from dbus")),
+                if startup_dbus_invert { 1.0 } else { 0.0 },
+                dbus_temperature_to_ui_value(startup_dbus_temperature),
+                dbus_brightness_to_ui_value(startup_dbus_brightness),
+                dbus_gamma_to_ui_value(startup_dbus_gamma),
+                startup_dbus_temperature,
+                startup_dbus_brightness,
+                startup_dbus_gamma,
             )
         });
 
-        let (startup_inverted, startup_temperature, startup_brightness, startup_gamma) =
-            get_dbus_state.join().expect("rust: get dbus state");
+        let (
+            startup_inverted,
+            startup_temperature,
+            startup_brightness,
+            startup_gamma,
+            startup_dbus_temperature,
+            startup_dbus_brightness,
+            startup_dbus_gamma,
+        ) = get_dbus_state.join().expect("rust: get dbus state");
+
+        if !args.hide_temperature {
+            app.global::<Parameters>()
+                .set_value_text(dbus_temperature_to_string(startup_dbus_temperature as i16).into());
+        } else if !args.hide_brightness {
+            app.global::<Parameters>()
+                .set_value_text(dbus_brightness_to_string(startup_dbus_brightness).into());
+        } else if !args.hide_gamma {
+            app.global::<Parameters>()
+                .set_value_text(dbus_gamma_to_string(startup_dbus_gamma).into());
+        } else {
+            app.global::<Startup>().set_show_value(false);
+        }
 
         // initialize parameter ui values based on current gammarelay state
         app.global::<Parameters>()
@@ -342,28 +384,42 @@ fn main() -> Result<(), AppletError> {
                     let server_value =
                         proxy.temperature().expect("rust: get server temperature") as i16;
                     let dbus_delta = desired_value - server_value;
-                    if dbus_delta.abs() > 0 {
+                    let rounded_delta = dbus_temperature_rounded(dbus_delta);
+                    if rounded_delta.abs() > 0 {
+                        app.global::<Parameters>().set_value_text(
+                            dbus_temperature_to_string(server_value + rounded_delta).into(),
+                        );
+
                         proxy
-                            .update_temperature((dbus_delta as f64 / 100.0) as i16 * 100)
+                            .update_temperature(rounded_delta)
                             .expect("rust: expect set temperature");
                         settings.invalidate_deltas();
                     }
                 }
 
                 if settings.brightness.delta_accumulation != 0.0 {
+                    let server_value = proxy.brightness().expect("rust: get server brightness");
+                    let rounded_delta =
+                        dbus_brightness_rounded(settings.brightness.delta_accumulation as f64);
+                    app.global::<Parameters>().set_value_text(
+                        dbus_brightness_to_string(server_value + rounded_delta).into(),
+                    );
+
                     proxy
-                        .update_brightness(ui_brightness_delta_to_dbus_value(
-                            settings.brightness.delta_accumulation,
-                        ))
+                        .update_brightness(rounded_delta)
                         .expect("rust: expect set brightness");
                     settings.invalidate_deltas();
                 }
 
                 if settings.gamma.delta_accumulation != 0.0 {
+                    let server_value = proxy.gamma().expect("rust: get server gamma");
+                    let rounded_delta =
+                        dbus_gamma_rounded(settings.gamma.delta_accumulation as f64);
+                    app.global::<Parameters>()
+                        .set_value_text(dbus_gamma_to_string(server_value + rounded_delta).into());
+
                     proxy
-                        .update_gamma(ui_gamma_delta_to_dbus_value(
-                            settings.gamma.delta_accumulation,
-                        ))
+                        .update_gamma(rounded_delta)
                         .expect("rust: expect set gamma");
                     settings.invalidate_deltas();
                 }
