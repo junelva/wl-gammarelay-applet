@@ -9,25 +9,43 @@ This applet is written in Rust and provides a [Slint](https://github.com/slint-u
 
 The applet is configurable:
 ```
-$ wl-gammarelay-applet --help
 Control wl-gammarelay-rs via applet.
 
 Usage: wl-gammarelay-applet [OPTIONS]
 
 Options:
-  -i, --hide-invert                    Hides switch that controls Invert
-  -t, --hide-temperature               Hides slider that controls Temperature
-  -b, --hide-brightness                Hides slider that controls Brightness
-  -g, --hide-gamma                     Hides slider that controls Gamma
-  -c, --hide-caret                     Hides "speech bubble" caret at bottom of applet
-  -l, --hide-labels                    Hides text labels of control widgets
-  -v, --hide-value                     Hides text value of active control widgets
-  -f, --never-fade                     Set this flag to never automatically fade the window
-  -p, --outer-padding <OUTER_PADDING>  Set applet window outer padding [default: 8]
-  -x, --window-width <WINDOW_WIDTH>    Set applet window width (horizontal) [default: 100]
-  -y, --window-height <WINDOW_HEIGHT>  Set applet window height (vertical) [default: 220]
-  -h, --help                           Print help
-  -V, --version                        Print version
+  -i, --hide-invert
+          Hides switch that controls Invert
+  -t, --hide-temperature
+          Hides slider that controls Temperature
+  -b, --hide-brightness
+          Hides slider that controls Brightness
+  -g, --hide-gamma
+          Hides slider that controls Gamma
+  -c, --hide-caret
+          Hides "speech bubble" caret at bottom of applet
+  -l, --hide-labels
+          Hides text labels of control widgets
+  -v, --hide-value
+          Hides text value of active control widgets
+  -f, --never-fade
+          Set this flag to never automatically fade the window
+  -p, --outer-padding <OUTER_PADDING>
+          Set applet window outer padding [default: 8]
+  -x, --window-width <WINDOW_WIDTH>
+          Set applet window width (horizontal) [default: 100]
+  -y, --window-height <WINDOW_HEIGHT>
+          Set applet window height (vertical) [default: 220]
+  -T, --default-temperature <DEFAULT_TEMPERATURE>
+          'Reset' value for temperature. (1000 - 10000) [default: 6500]
+  -B, --default-brightness <DEFAULT_BRIGHTNESS>
+          'Reset' value for brightness. (0.0 - 1.0) [default: 1]
+  -G, --default-gamma <DEFAULT_GAMMA>
+          'Reset' value for gamma. ( 0.5 - 1.5) [default: 1]
+  -h, --help
+          Print help
+  -V, --version
+          Print version
 ```
 
 #### Usage
