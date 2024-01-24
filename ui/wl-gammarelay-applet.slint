@@ -137,6 +137,7 @@ export global Parameters {
     callback slider-changed(string, float);
     in-out property<float> window-opacity: 0.0;
     in-out property<string> value-text: "";
+    in-out property <bool> focus-retain: false;
 
     in-out property<bool> invert;
     in-out property<float> temperature;
@@ -175,73 +176,91 @@ export component WlGammaRelayApplet inherits Window {
     manage_opacity(delta) => {
         if (applet-focus.has-hover) {
             Startup.fade-in = false;
+            applet-kb-focus.focus();
         }
         if ((Startup.fade-in || applet-focus.has-hover) && Parameters.window-opacity <= 1.0) {
             Parameters.window-opacity += (delta / 1000.0) * Startup.fade-in-speed;
             if (Parameters.window-opacity >= 1.0) {
                 Parameters.window-opacity = 1.0;
             }
-        } else if (!applet-focus.has-hover) {
+        } else if (!applet-focus.has-hover && !applet-kb-focus.has-focus) {
             Parameters.window-opacity -= (delta / 1000.0) * Startup.fade-out-speed;
         }
     }
 
     applet-focus := TouchArea {
-        opaque-region := VerticalLayout {
-            panel-rect := Rectangle {
-                border-width: 2px;
-                border-color: #777;
-                border-radius: 6px;
-                background: #111;
-                opacity: Parameters.window-opacity;
-            
-                controls := VerticalLayout {
-                    padding: Startup.outer_padding * 1px;
-                    
-                    if Startup.show_value : value := Rectangle {
-                        Text {
-                            text: Parameters.value-text;
-                        }
-                    }
+        applet-kb-focus := FocusScope {
+            key-pressed(event) => {
+                if (event.modifiers.shift || event.modifiers.meta) {
+                    Parameters.focus-retain = true;
+                    self.focus();
+                }
+                EventResult.accept
+            }
+            key-released(event) => {
+                if (!event.modifiers.shift || event.modifiers.meta) {
+                    Parameters.focus-retain = false;
+                    self.focus();
+                }
+                EventResult.accept
+            }
 
-                    if Startup.show_invert : invert := LabeledToggleSwitch {
-                        label: "◩";
-                        checked: Parameters.invert;
-                        padding-bottom: 0px;
-                    }
-
-                    sliders := HorizontalLayout {
-                        padding: 4px;
-                        spacing: 2px;
-
-                        if Startup.show_temperature : temperature := LabeledVerticalSlider {
-                            label: "";
-                            param-name: "temperature";
-                            value: Parameters.temperature;
-                            minimum: 0.0;
-                            maximum: 1.0;
+            opaque-region := VerticalLayout {
+                panel-rect := Rectangle {
+                    border-width: 2px;
+                    border-color: #777;
+                    border-radius: 6px;
+                    background: #111;
+                    opacity: Parameters.window-opacity;
+                
+                    controls := VerticalLayout {
+                        padding: Startup.outer_padding * 1px;
+                        
+                        if Startup.show_value : value := Rectangle {
+                            Text {
+                                text: Parameters.value-text;
+                            }
                         }
-                        if Startup.show_brightness : brightness := LabeledVerticalSlider {
-                            label: "";
-                            param-name: "brightness";
-                            value: Parameters.brightness;
-                            minimum: 0.0;
-                            maximum: 1.0;
+
+                        if Startup.show_invert : invert := LabeledToggleSwitch {
+                            label: "◩";
+                            checked: Parameters.invert;
+                            padding-bottom: 0px;
                         }
-                        if Startup.show_gamma : gamma := LabeledVerticalSlider {
-                            label: "𝚪";
-                            param-name: "gamma";
-                            value: Parameters.gamma;
-                            minimum: 0.0;
-                            maximum: 1.0;
+
+                        sliders := HorizontalLayout {
+                            padding: 4px;
+                            spacing: 2px;
+
+                            if Startup.show_temperature : temperature := LabeledVerticalSlider {
+                                label: "";
+                                param-name: "temperature";
+                                value: Parameters.temperature;
+                                minimum: 0.0;
+                                maximum: 1.0;
+                            }
+                            if Startup.show_brightness : brightness := LabeledVerticalSlider {
+                                label: "";
+                                param-name: "brightness";
+                                value: Parameters.brightness;
+                                minimum: 0.0;
+                                maximum: 1.0;
+                            }
+                            if Startup.show_gamma : gamma := LabeledVerticalSlider {
+                                label: "𝚪";
+                                param-name: "gamma";
+                                value: Parameters.gamma;
+                                minimum: 0.0;
+                                maximum: 1.0;
+                            }
                         }
                     }
                 }
-            }
-            if Startup.show_caret : tail := WindowCaret {
-                fill: #777;
-                height: 16px;
-                opacity: Parameters.window-opacity;
+                if Startup.show_caret : tail := WindowCaret {
+                    fill: #777;
+                    height: 16px;
+                    opacity: Parameters.window-opacity;
+                }
             }
         }
     }

@@ -120,15 +120,15 @@ fn dbus_brightness_to_ui_value(dbus_value: f64) -> f32 {
 }
 // 0.0 - 1.0 to
 // 0.2 - 1.0
-// fn ui_brightness_to_dbus_value(ui_value: f32) -> f64 {
-//     ui_value as f64 * 0.8 + 0.2
-// }
+fn ui_brightness_delta_to_dbus_value(ui_value: f32) -> f64 {
+    ui_value as f64 * 0.8
+}
 // fn ui_brightness_delta_to_dbus_value(ui_value: f32) -> f64 {
 //     ui_value as f64 * 0.8
 // }
 fn dbus_brightness_to_string(dbus_value: f64) -> String {
     let percentage = dbus_value * 100.0;
-    format!("{percentage:.0} %")
+    format!("{percentage:3.0} %")
 }
 fn dbus_brightness_rounded(dbus_value: f64) -> f64 {
     (dbus_value * 100.0).round() / 100.0
@@ -399,8 +399,9 @@ fn main() -> Result<(), AppletError> {
 
                 if settings.brightness.delta_accumulation != 0.0 {
                     let server_value = proxy.brightness().expect("rust: get server brightness");
-                    let rounded_delta =
-                        dbus_brightness_rounded(settings.brightness.delta_accumulation as f64);
+                    let rounded_delta = dbus_brightness_rounded(ui_brightness_delta_to_dbus_value(
+                        settings.brightness.delta_accumulation,
+                    ));
                     app.global::<Parameters>().set_value_text(
                         dbus_brightness_to_string(server_value + rounded_delta).into(),
                     );

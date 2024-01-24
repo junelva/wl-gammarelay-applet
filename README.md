@@ -31,7 +31,8 @@ Options:
 
 0.1.4 changes:
 - [x] Text label showing set value.
-- [ ] Lock fade if key pressed.
+- [x] Lock fade if shift or meta pressed.
+- [ ] Option to never fade out.
 - [ ] Esc to close window.
 - [ ] Configurable min & max.
 - [ ] Configurable default value.
