@@ -3,7 +3,7 @@ name = "wl-gammarelay-applet"
 description = "Control wl-gammarelay-rs via applet."
 authors = ["June Elva"]
 edition = "2021"
-version = "0.1.2"
+version = "0.1.3"
 build = "build.rs"
 
 [dependencies]
