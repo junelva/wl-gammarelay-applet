@@ -48,6 +48,9 @@ struct Args {
     /// Hides text value of active control widgets
     #[arg(short = 'v', long, default_value_t = false)]
     hide_value: bool,
+    /// Set this flag to never automatically fade the window.
+    #[arg(short = 'f', long, default_value_t = false)]
+    never_fade: bool,
     /// Set applet window outer padding
     #[arg(short = 'p', long, default_value_t = 8)]
     outer_padding: usize,
@@ -229,6 +232,7 @@ fn main() -> Result<(), AppletError> {
         app.global::<Startup>().set_show_caret(!args.hide_caret);
         app.global::<Startup>().set_show_labels(!args.hide_labels);
         app.global::<Startup>().set_show_value(!args.hide_value);
+        app.global::<Startup>().set_never_fade(args.never_fade);
         app.global::<Startup>()
             .set_outer_padding(args.outer_padding as i32);
         app.global::<Startup>()

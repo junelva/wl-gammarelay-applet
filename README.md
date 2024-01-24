@@ -31,15 +31,15 @@ Options:
 
 #### Usage
 
-Click, drag, or scroll the sliders to change the values. Shift+scroll changes the value in smaller increments. If you resize windows in your compositor with the `meta` key, the applet window can be resized.
+Click, drag, or scroll the sliders to change the values. `shift + scroll` changes the value in smaller increments. If you resize windows in your compositor with the `meta` key, the applet window can be resized. Pressing `escape` will close the window.
 
 #### Changes
 
 0.1.4 changes:
 - [x] Text label showing set value.
 - [x] Lock fade if shift or meta pressed.
-- [ ] Option to never fade out.
-- [ ] Esc to close window.
+- [x] Option to never fade out.
+- [x] Esc to close window.
 - [ ] Configurable min & max.
 - [ ] Configurable default value.
 - [ ] Right-click to reset to default.
@@ -84,6 +84,9 @@ for_window [app_id="wl-gammarelay-applet"] sticky enable, move position cursor, 
 
 #### Curiosity
 ```bash
+# Open a simple window that does not automatically close.
+wl-gammarelay-applet -fc
+
 # Display only brightness and gamma with caret.
 wl-gammarelay-applet -it -p0 -x175
 

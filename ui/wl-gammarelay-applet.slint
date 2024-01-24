@@ -137,7 +137,8 @@ export global Parameters {
     callback slider-changed(string, float);
     in-out property<float> window-opacity: 0.0;
     in-out property<string> value-text: "";
-    in-out property <bool> focus-retain: false;
+    in-out property<bool> focus-retain: false;
+    in-out property<bool> force-exit: false;
 
     in-out property<bool> invert;
     in-out property<float> temperature;
@@ -158,7 +159,8 @@ export global Startup {
    
     in property<bool> show-caret: true;
     in property<bool> show-labels: true;
-   
+
+    in property<bool> never-fade: false;
     in property<int> outer-padding: 8;
     in property<int> window-width: 100;
     in property<int> window-height: 220;
@@ -183,7 +185,7 @@ export component WlGammaRelayApplet inherits Window {
             if (Parameters.window-opacity >= 1.0) {
                 Parameters.window-opacity = 1.0;
             }
-        } else if (!applet-focus.has-hover && !applet-kb-focus.has-focus) {
+        } else if ((!applet-focus.has-hover && !applet-kb-focus.has-focus && !Startup.never-fade) || Parameters.force-exit) {
             Parameters.window-opacity -= (delta / 1000.0) * Startup.fade-out-speed;
         }
     }
@@ -191,6 +193,9 @@ export component WlGammaRelayApplet inherits Window {
     applet-focus := TouchArea {
         applet-kb-focus := FocusScope {
             key-pressed(event) => {
+                if (event.text == "\u{001B}") { // escape
+                    Parameters.force-exit = true;
+                }
                 if (event.modifiers.shift || event.modifiers.meta) {
                     Parameters.focus-retain = true;
                     self.focus();
