@@ -128,7 +128,7 @@ fn dbus_brightness_to_ui_value(dbus_value: f64) -> f32 {
 // }
 fn dbus_brightness_to_string(dbus_value: f64) -> String {
     let percentage = dbus_value * 100.0;
-    format!("{percentage:.2} %")
+    format!("{percentage:.0} %")
 }
 fn dbus_brightness_rounded(dbus_value: f64) -> f64 {
     (dbus_value * 100.0).round() / 100.0
