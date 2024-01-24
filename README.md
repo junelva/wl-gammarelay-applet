@@ -28,7 +28,16 @@ Options:
   -V, --version                        Print version
 ```
 
-Known issues: escape does not close the window (todo). If you spend a long time scrolling over the sliders, the applet loses connection and must be restarted (cause unknown; suspect DBus rate limiting).
+0.1.3 changes:
+- Switch to blocking zbus proxy.
+- Round temperature adjustments to nearest 100.
+- Safely mutate settings, call DBus proxy from threads.
+
+To do:
+- [ ] Esc to close window.
+- [ ] Configurable min & max.
+- [ ] Configurable default value.
+- [ ] Right-click to reset to default.
 
 Contribution welcome.
 
