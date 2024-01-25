@@ -113,16 +113,14 @@ fn dbus_temperature_to_ui_value(dbus_value: u16) -> f64 {
 fn dbus_temperature_delta_to_ui_value(dbus_value: i16) -> f64 {
     (dbus_value as f64) * (1.0 / 9000.0)
 }
-//  0.0 - 1.0 to
-// 1000 - 10000
-fn ui_temperature_to_dbus_value(ui_value: f64) -> i16 {
-    (ui_value * 9000.0 + 1000.0) as i16
+fn ui_temperature_delta_to_dbus_value(ui_value: f64) -> i16 {
+    (ui_value * 9000.0) as i16
 }
 fn dbus_temperature_to_string(dbus_value: i16) -> String {
     format!("{dbus_value} K")
 }
 fn dbus_temperature_rounded(dbus_value: i16) -> i16 {
-    (dbus_value as f64 / 100.0) as i16 * 100
+    ((dbus_value as f64 / 100.0) as i16) * 100
 }
 
 fn dbus_brightness_to_ui_value(dbus_value: f64) -> f64 {
@@ -450,20 +448,26 @@ fn main() -> Result<(), AppletError> {
                 }
 
                 if settings.temperature.delta_accumulation != 0.0 {
-                    let desired_value = ui_temperature_to_dbus_value(
-                        settings.temperature.value + settings.temperature.delta_accumulation,
-                    );
                     let server_value =
                         proxy.temperature().expect("rust: get server temperature") as i16;
-                    let dbus_delta = desired_value - server_value;
-                    let rounded_delta = dbus_temperature_rounded(dbus_delta);
-                    let final_value = server_value + rounded_delta;
-                    if rounded_delta.abs() > 0 && (final_value > 1000 && final_value < 10000) {
+                    let dbus_delta =
+                        ui_temperature_delta_to_dbus_value(settings.temperature.delta_accumulation);
+                    let (final_value, clamped_delta) = {
+                        let rounded_delta = dbus_temperature_rounded(dbus_delta);
+                        let proposed_final_value = server_value + rounded_delta;
+                        if proposed_final_value < 1000 {
+                            (1000, 1000 - server_value)
+                        } else if proposed_final_value > 10000 {
+                            (10000, 10000 - server_value)
+                        } else {
+                            (proposed_final_value, rounded_delta)
+                        }
+                    };
+                    if clamped_delta.abs() > 0 {
                         app.global::<Parameters>()
                             .set_value_text(dbus_temperature_to_string(final_value).into());
-
                         proxy
-                            .update_temperature(rounded_delta)
+                            .update_temperature(clamped_delta)
                             .expect("rust: expect set temperature");
                         settings.invalidate_deltas();
                     }

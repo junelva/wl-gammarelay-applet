@@ -61,6 +61,7 @@ Click, drag, or scroll the sliders to change the values. `shift + scroll` change
 - [x] Esc to close window.
 - [x] Configurable default value.
 - [x] Right-click to reset to default.
+- [x] Temperature click conversion (bugfix)
 
 0.1.3 changes:
 - Switch to blocking zbus proxy.
@@ -68,7 +69,7 @@ Click, drag, or scroll the sliders to change the values. `shift + scroll` change
 - Safely mutate settings, call DBus proxy from threads.
 
 Known issue(s):
-- There can be drift when changing sliders with wheel or left click. Usually not a problem.
+- There can be drift when changing sliders with wheel or left click. See 0.1.4 bugfix.
 
 Contribution welcome.
 
